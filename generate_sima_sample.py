@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: HuQiong
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-11-19 12:23:15
+# @LastEditTime: 2019-11-28 16:47:35
 # @LastEditors: HuQiong
 
 import os
@@ -56,7 +56,7 @@ class GenerateSiamsesSample(object):
         obj_img=img[roi[1]:roi[3],roi[0]:roi[2],:]
         img[ymin:ymax,xmin:xmax]=obj_img
 
-        img,h_shift,w_shift=shift_img(img)
+        img,h_shift,w_shift=shift_img(img,0)
         xmin=max(0,xmin+w_shift)
         xmax=min(xmax+w_shift,img.shape[1])
         ymin=max(0,ymin+h_shift)
