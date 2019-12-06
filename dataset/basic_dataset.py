@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description: 数据集类的基类，虚类，不要实例化
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-12-06 13:20:04
 # @LastEditTime: 2019-12-06 15:38:32
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 import os
 import random
 

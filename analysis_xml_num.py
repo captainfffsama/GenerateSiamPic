@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/06/10 18:56
-# @Author  : HuQiong
+# @Author  : CaptainHu
 
 import os
 import xml.etree.ElementTree as ET

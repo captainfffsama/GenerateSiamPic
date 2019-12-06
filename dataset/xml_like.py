@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description: 用于管理类似voc使用xml管理的dataset
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-12-05 17:00:04
 # @LastEditTime: 2019-12-06 15:39:59
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 import os
 import random
 

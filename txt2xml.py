@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description: 之前的标签写错了，这个脚本将txt生成xml
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-11-07 12:27:32
 # @LastEditTime: 2019-11-07 13:44:40
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 import os 
 import glob    
 from concurrent import futures

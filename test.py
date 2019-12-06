@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description: 测试用的脚本
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-12-06 15:24:51
 # @LastEditTime: 2019-12-06 15:38:53
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 import cv2
 
 from dataset import XMLLikeDataset

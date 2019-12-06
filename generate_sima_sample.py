@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-11-05 09:41:32
 # @LastEditTime: 2019-12-05 16:40:39
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 
 import os
 import copy

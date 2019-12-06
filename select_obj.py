@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description: 从xml中选出要保留的目标 运行时间
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-07-02 10:47:10
 # @LastEditTime: 2019-11-05 18:12:46
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 
 import xml.etree.ElementTree as ET
 import os

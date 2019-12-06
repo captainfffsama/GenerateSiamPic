@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description: xml常用的一些工具
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-11-05 11:02:08
 # @LastEditTime: 2019-11-07 15:45:49
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 import xml.etree.ElementTree as ET
 import os
 

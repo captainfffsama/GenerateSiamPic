@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # @Description: 图像增强
-# @Author: HuQiong
+# @Author: CaptainHu
 # @Date: 2019-11-05 15:24:04
 # @LastEditTime: 2019-11-19 12:18:50
-# @LastEditors: HuQiong
+# @LastEditors: CaptainHu
 import random
 
 import cv2
