@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: HuQiong
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-11-28 16:47:35
+# @LastEditTime: 2019-12-05 16:40:39
 # @LastEditors: HuQiong
 
 import os
@@ -26,16 +26,16 @@ class GenerateSiamsesSample(object):
         assert os.path.exists(xml_dir),'Error! {} is not exist'.format(xml_dir)
         self._xml_dir=xml_dir
         self._all_xml_path_list=self.get_all_xml_path(xml_dir)
-        assert hasattr(AGPolicy(),img_ag),'there is no {} method,please check utils.img_ag.AGPolicy'.format(img_ag)
-        self._img_ag=getattr(AGPolicy(),img_ag)
+        if img_ag is not None:
+            assert hasattr(AGPolicy(),img_ag),'there is no {} method,please check utils.img_ag.AGPolicy'.format(img_ag)
+            self._img_ag=getattr(AGPolicy(),img_ag)
     
-    def get_all_xml_path(self,xml_dir:str,filter_=('.xml')) -> list:
-        #遍历文件夹下所有的xml
-        return [os.path.join(maindir,filename) for maindir,_,file_name_list in os.walk(xml_dir) \
-            for filename in file_name_list \
-            if os.path.splitext(filename)[1] in filter_ ]
 
     def deal_one_sample(self,idx,xml_path:str):
+        #取得要粘贴的目标和背景图片
+        #两者预处理
+        #融合方法（seamlessclone和直接贴）
+        #保存
         sample_info=analysis_label_info(xml_path)
         if len(sample_info.objs_info)==0:
             return
@@ -61,7 +61,8 @@ class GenerateSiamsesSample(object):
         xmax=min(xmax+w_shift,img.shape[1])
         ymin=max(0,ymin+h_shift)
         ymax=min(ymax+h_shift,img.shape[0])
-        img=self._img_ag(image=img)['image']
+        if hasattr(self,'_img_ag'):
+            img=self._img_ag(image=img)['image']
         #存样本
         cv2.imwrite(os.path.join(_sample_save_path,str(idx)+".jpg"),img)
         cv2.imwrite(os.path.join(_sample_save_path,str(idx)+"_original.jpg"),img_o)
