@@ -3,7 +3,7 @@
 # @Description: 使用coco合成
 # @Author: CaptainHu
 # @Date: 2019-12-09 19:20:38
-# @LastEditTime: 2019-12-10 14:52:27
+# @LastEditTime: 2019-12-10 16:20:41
 # @LastEditors: CaptainHu
 import random
 import math
@@ -49,10 +49,11 @@ class COCODataset(BasicDataset):
         fg=fg[box[1]:box[3],box[0]:box[2]]
         return fg,mask
     
+    #NOTE:注意COCO原始box是(x,y,w,h)，这里变换完之后变成tr和bl
     def _deal_limit(self,img_shape,box):
         box_=[1]*4
         box_[0]=max(0,round(box[0]))
-        box_[2]=max(0,round(box[2]))
-        box_[1]=min(img_shape[0]-1,round(box[1]))
-        box_[3]=min(img_shape[1]-1,round(box[3]))
+        box_[1]=max(0,round(box[1]))
+        box_[2]=min(img_shape[1]-1,round(box[0]+box[2]))
+        box_[3]=min(img_shape[0]-1,round(box[1]+box[3]))
         return box_ 

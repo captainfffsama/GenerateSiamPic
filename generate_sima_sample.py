@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: CaptainHu
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-12-07 09:30:40
+# @LastEditTime: 2019-12-10 15:41:34
 # @LastEditors: CaptainHu
 
 import os
@@ -16,59 +16,74 @@ import cv2
 from tqdm import tqdm
 
 from utils.xml_tools import LabelInfo,analysis_label_info,generate_xml
-from utils.img_ag import AGPolicy,shift_img
+from utils.img_ag import AGPolicy,shift_img,rescale_img
+from utils.integration import replace
 from dataset import XMLLikeDataset
 
 class GenerateSiamsesSample(object):
-    def __init__(self,dataset,save_dir:str,img_ag:str='v1'):
+    def __init__(self,dataset,save_dir:str,integration_mode:str = 'seamlessclone',img_ag:str='v1'):
         self._save_dir=save_dir
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
+        # if not os.path.exists(save_dir):
+        #     os.makedirs(save_dir)
         self.dataset=dataset
+        if integration_mode=='seamlessclone':
+            self.integration=replace
+        elif integration_mode=='replace':
+            pass
+        else:
+            pass
         if img_ag is not None:
             assert hasattr(AGPolicy(),img_ag),'there is no {} method,please check utils.img_ag.AGPolicy'.format(img_ag)
             self._img_ag=getattr(AGPolicy(),img_ag)
     
+    def deal_one_sample(self,bg,fg,mask):
+        bg,fg,mask=rescale_img(bg,fg,mask)
+        img,box=self.integration(bg,fg,mask)
+        return img,box
 
-    def deal_one_sample(self,idx,xml_path:str):
-        #取得要粘贴的目标和背景图片
-        #两者预处理
-        #融合方法（seamlessclone和直接贴）
-        #保存
-        sample_info=analysis_label_info(xml_path)
-        if len(sample_info.objs_info)==0:
-            return
-        _sample_save_path=os.path.join(self._save_dir,str(idx))
-        if os.path.exists(_sample_save_path):
-            shutil.rmtree(_sample_save_path)
-        os.makedirs(_sample_save_path)
-        img=cv2.imread(os.path.join(self._xml_dir,sample_info.jpg_name))
-        img_o=copy.deepcopy(img)
-        obj=sample_info.objs_info[0]
+    def test(self):
+        bg,fg,mask=next(self.dataset)
+        return self.deal_one_sample(bg,fg,mask)
+
+    # def deal_one_sample(self,idx,xml_path:str):
+    #     #取得要粘贴的目标和背景图片
+    #     #两者预处理
+    #     #融合方法（seamlessclone和直接贴）
+    #     #保存
+    #     sample_info=analysis_label_info(xml_path)
+    #     if len(sample_info.objs_info)==0:
+    #         return
+    #     _sample_save_path=os.path.join(self._save_dir,str(idx))
+    #     if os.path.exists(_sample_save_path):
+    #         shutil.rmtree(_sample_save_path)
+    #     os.makedirs(_sample_save_path)
+    #     img=cv2.imread(os.path.join(self._xml_dir,sample_info.jpg_name))
+    #     img_o=copy.deepcopy(img)
+    #     obj=sample_info.objs_info[0]
         
-        xmin,ymin,xmax,ymax=obj[1:]
-        roi_w,roi_h=xmax-xmin,ymax-ymin
-        img_h,img_w,_=sample_info.shape
+    #     xmin,ymin,xmax,ymax=obj[1:]
+    #     roi_w,roi_h=xmax-xmin,ymax-ymin
+    #     img_h,img_w,_=sample_info.shape
 
-        tl_point_x,tl_point_y=random.randint(0,img_w-1-roi_w),random.randint(0,img_h-1-roi_h)
-        roi=(tl_point_x,tl_point_y,tl_point_x+roi_w,tl_point_y+roi_h)
-        obj_img=img[roi[1]:roi[3],roi[0]:roi[2],:]
-        img[ymin:ymax,xmin:xmax]=obj_img
+    #     tl_point_x,tl_point_y=random.randint(0,img_w-1-roi_w),random.randint(0,img_h-1-roi_h)
+    #     roi=(tl_point_x,tl_point_y,tl_point_x+roi_w,tl_point_y+roi_h)
+    #     obj_img=img[roi[1]:roi[3],roi[0]:roi[2],:]
+    #     img[ymin:ymax,xmin:xmax]=obj_img
 
-        img,h_shift,w_shift=shift_img(img,0)
-        xmin=max(0,xmin+w_shift)
-        xmax=min(xmax+w_shift,img.shape[1])
-        ymin=max(0,ymin+h_shift)
-        ymax=min(ymax+h_shift,img.shape[0])
-        if hasattr(self,'_img_ag'):
-            img=self._img_ag(image=img)['image']
-        #存样本
-        cv2.imwrite(os.path.join(_sample_save_path,str(idx)+".jpg"),img)
-        cv2.imwrite(os.path.join(_sample_save_path,str(idx)+"_original.jpg"),img_o)
-        save_img_info=LabelInfo(os.path.join(_sample_save_path,str(idx)+".jpg"),\
-                                shape=sample_info.shape,
-                                objs_info=[("diff",xmin,ymin,xmax,ymax),])
-        generate_xml(os.path.join(_sample_save_path,str(idx)+".xml"),save_img_info)
+    #     img,h_shift,w_shift=shift_img(img,0)
+    #     xmin=max(0,xmin+w_shift)
+    #     xmax=min(xmax+w_shift,img.shape[1])
+    #     ymin=max(0,ymin+h_shift)
+    #     ymax=min(ymax+h_shift,img.shape[0])
+    #     if hasattr(self,'_img_ag'):
+    #         img=self._img_ag(image=img)['image']
+    #     #存样本
+    #     cv2.imwrite(os.path.join(_sample_save_path,str(idx)+".jpg"),img)
+    #     cv2.imwrite(os.path.join(_sample_save_path,str(idx)+"_original.jpg"),img_o)
+    #     save_img_info=LabelInfo(os.path.join(_sample_save_path,str(idx)+".jpg"),\
+    #                             shape=sample_info.shape,
+    #                             objs_info=[("diff",xmin,ymin,xmax,ymax),])
+    #     generate_xml(os.path.join(_sample_save_path,str(idx)+".xml"),save_img_info)
 
     def do_task(self):
         # self._all_xml_path_list=['/home/chiebotgpuhq/MyCode/dataset/Siam_detection/aqmzc/ffcd422486d5c6fc0d12604457737e59.xml',]
