@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: CaptainHu
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-12-05 16:40:39
+# @LastEditTime: 2019-12-07 09:30:40
 # @LastEditors: CaptainHu
 
 import os
@@ -17,15 +17,14 @@ from tqdm import tqdm
 
 from utils.xml_tools import LabelInfo,analysis_label_info,generate_xml
 from utils.img_ag import AGPolicy,shift_img
+from dataset import XMLLikeDataset
 
 class GenerateSiamsesSample(object):
-    def __init__(self,xml_dir:str,save_dir:str,img_ag:str='v1'):
+    def __init__(self,dataset,save_dir:str,img_ag:str='v1'):
         self._save_dir=save_dir
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-        assert os.path.exists(xml_dir),'Error! {} is not exist'.format(xml_dir)
-        self._xml_dir=xml_dir
-        self._all_xml_path_list=self.get_all_xml_path(xml_dir)
+        self.dataset=dataset
         if img_ag is not None:
             assert hasattr(AGPolicy(),img_ag),'there is no {} method,please check utils.img_ag.AGPolicy'.format(img_ag)
             self._img_ag=getattr(AGPolicy(),img_ag)

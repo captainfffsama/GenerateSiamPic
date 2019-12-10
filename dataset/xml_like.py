@@ -3,7 +3,7 @@
 # @Description: 用于管理类似voc使用xml管理的dataset
 # @Author: CaptainHu
 # @Date: 2019-12-05 17:00:04
-# @LastEditTime: 2019-12-06 15:39:59
+# @LastEditTime: 2019-12-09 19:19:46
 # @LastEditors: CaptainHu
 import os
 import random
@@ -14,12 +14,15 @@ import numpy as np
 from .basic_dataset import BasicDataset
 from utils.xml_tools import analysis_label_info
 
+'''
+xml数据集返回的是随机裁减出来的一张目标作为前景,返回的mask和前景box一样大小
+'''
 class XMLLikeDataset(BasicDataset):
     def __init__(self,xml_dir:str,sampler:str = 'random'):
         self._all_xml_path=self._get_all_xml_path(xml_dir)
         self.sampler=self._get_sampler(sampler)
 
-    def _get_all_xml_path(self,xml_dir:str,filter_=('.xml')) -> list:
+    def _get_all_xml_path(self,xml_dir:str,filter_=('.xml')) -> list: 
         #遍历文件夹下所有的xml
         return [os.path.join(maindir,filename) for maindir,_,file_name_list in os.walk(xml_dir) \
             for filename in file_name_list \
