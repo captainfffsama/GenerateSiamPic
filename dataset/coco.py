@@ -3,9 +3,10 @@
 # @Description: 使用coco合成
 # @Author: CaptainHu
 # @Date: 2019-12-09 19:20:38
-# @LastEditTime: 2019-12-10 14:17:26
+# @LastEditTime: 2019-12-10 14:52:27
 # @LastEditors: CaptainHu
 import random
+import math
 
 from pycocotools.coco import COCO
 import skimage.io as io
@@ -43,7 +44,15 @@ class COCODataset(BasicDataset):
         annIds = self._coco.getAnnIds(imgIds=imgs[0]['id'], iscrowd=None)
         anns = self._coco.loadAnns(annIds)
         mask=self._coco.annToMask(anns[0])*255
-        box=[round(x) for x in anns[0]["bbox"]]
+        box=self._deal_limit(mask.shape,anns[0]["bbox"])
         mask=mask[box[1]:box[3],box[0]:box[2]]
         fg=fg[box[1]:box[3],box[0]:box[2]]
         return fg,mask
+    
+    def _deal_limit(self,img_shape,box):
+        box_=[1]*4
+        box_[0]=max(0,round(box[0]))
+        box_[2]=max(0,round(box[2]))
+        box_[1]=min(img_shape[0]-1,round(box[1]))
+        box_[3]=min(img_shape[1]-1,round(box[3]))
+        return box_ 
