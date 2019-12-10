@@ -3,7 +3,7 @@
 # @Description: 使用coco合成
 # @Author: CaptainHu
 # @Date: 2019-12-09 19:20:38
-# @LastEditTime: 2019-12-10 13:48:44
+# @LastEditTime: 2019-12-10 14:17:26
 # @LastEditors: CaptainHu
 import random
 
@@ -13,6 +13,7 @@ import numpy as np
 
 from .basic_dataset import BasicDataset
 
+from ipdb import set_trace
 class COCODataset(BasicDataset):
     def __init__(self,json_path:str, cats:list = None,sampler='random'):
         self._coco=COCO(json_path)
@@ -41,6 +42,8 @@ class COCODataset(BasicDataset):
         fg=io.imread(imgs[0]["coco_url"])[:,:,::-1]
         annIds = self._coco.getAnnIds(imgIds=imgs[0]['id'], iscrowd=None)
         anns = self._coco.loadAnns(annIds)
-        mask=self._coco.annToMask(anns[0])
-        mask=mask*255
+        mask=self._coco.annToMask(anns[0])*255
+        box=[round(x) for x in anns[0]["bbox"]]
+        mask=mask[box[1]:box[3],box[0]:box[2]]
+        fg=fg[box[1]:box[3],box[0]:box[2]]
         return fg,mask
