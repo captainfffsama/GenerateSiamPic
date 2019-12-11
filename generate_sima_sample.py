@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: CaptainHu
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-12-10 15:41:34
+# @LastEditTime: 2019-12-11 11:14:04
 # @LastEditors: CaptainHu
 
 import os
@@ -15,93 +15,78 @@ import shutil
 import cv2
 from tqdm import tqdm
 
-from utils.xml_tools import LabelInfo,analysis_label_info,generate_xml
+from utils.writer import save_xml
 from utils.img_ag import AGPolicy,shift_img,rescale_img
-from utils.integration import replace
-from dataset import XMLLikeDataset
+from utils.integration import replace,seamlessclone
+from dataset import XMLLikeDataset,COCODataset
 
 class GenerateSiamsesSample(object):
     def __init__(self,dataset,save_dir:str,integration_mode:str = 'seamlessclone',img_ag:str='v1'):
         self._save_dir=save_dir
-        # if not os.path.exists(save_dir):
-        #     os.makedirs(save_dir)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
         self.dataset=dataset
         if integration_mode=='seamlessclone':
-            self.integration=replace
+            self.integration=seamlessclone
         elif integration_mode=='replace':
-            pass
+            self.integration=replace
         else:
-            pass
+            self.integration=seamlessclone
         if img_ag is not None:
             assert hasattr(AGPolicy(),img_ag),'there is no {} method,please check utils.img_ag.AGPolicy'.format(img_ag)
             self._img_ag=getattr(AGPolicy(),img_ag)
     
-    def deal_one_sample(self,bg,fg,mask):
+    def deal_one_sample(self,bg,fg,mask,idx):
         bg,fg,mask=rescale_img(bg,fg,mask)
+        #TODO:
+        #这里其实可以加个增强的步骤，暂时先不加
         img,box=self.integration(bg,fg,mask)
-        return img,box
+        self._writer(idx,bg,img,box)
+
+    def _writer(self,idx,img_o,img,box):
+        '''
+        img_o:原始图片，就是bg
+        img:被P之后的结果图片
+        box:P上的目标所在的位置(xmin,ymin,xmax,ymax)
+        '''
+        #初始化一些路径
+        img_name=str(idx)+'.jpg'
+        img_o_name=str(idx)+'_origin.jpg'
+        save_dir=os.path.join(self._save_dir,str(idx))
+        if os.path.exists(save_dir):
+            shutil.rmtree(save_dir)
+        os.makedirs(save_dir)
+        #存图片
+        cv2.imwrite(os.path.join(save_dir,img_name),img)
+        cv2.imwrite(os.path.join(save_dir,img_o_name),img_o)
+        save_xml(save_dir,idx,img,box)
 
     def test(self):
-        bg,fg,mask=next(self.dataset)
-        return self.deal_one_sample(bg,fg,mask)
+        bg,fg,mask=self.dataset[100]
+        self.deal_one_sample(bg,fg,mask,100)
 
-    # def deal_one_sample(self,idx,xml_path:str):
-    #     #取得要粘贴的目标和背景图片
-    #     #两者预处理
-    #     #融合方法（seamlessclone和直接贴）
-    #     #保存
-    #     sample_info=analysis_label_info(xml_path)
-    #     if len(sample_info.objs_info)==0:
-    #         return
-    #     _sample_save_path=os.path.join(self._save_dir,str(idx))
-    #     if os.path.exists(_sample_save_path):
-    #         shutil.rmtree(_sample_save_path)
-    #     os.makedirs(_sample_save_path)
-    #     img=cv2.imread(os.path.join(self._xml_dir,sample_info.jpg_name))
-    #     img_o=copy.deepcopy(img)
-    #     obj=sample_info.objs_info[0]
-        
-    #     xmin,ymin,xmax,ymax=obj[1:]
-    #     roi_w,roi_h=xmax-xmin,ymax-ymin
-    #     img_h,img_w,_=sample_info.shape
-
-    #     tl_point_x,tl_point_y=random.randint(0,img_w-1-roi_w),random.randint(0,img_h-1-roi_h)
-    #     roi=(tl_point_x,tl_point_y,tl_point_x+roi_w,tl_point_y+roi_h)
-    #     obj_img=img[roi[1]:roi[3],roi[0]:roi[2],:]
-    #     img[ymin:ymax,xmin:xmax]=obj_img
-
-    #     img,h_shift,w_shift=shift_img(img,0)
-    #     xmin=max(0,xmin+w_shift)
-    #     xmax=min(xmax+w_shift,img.shape[1])
-    #     ymin=max(0,ymin+h_shift)
-    #     ymax=min(ymax+h_shift,img.shape[0])
-    #     if hasattr(self,'_img_ag'):
-    #         img=self._img_ag(image=img)['image']
-    #     #存样本
-    #     cv2.imwrite(os.path.join(_sample_save_path,str(idx)+".jpg"),img)
-    #     cv2.imwrite(os.path.join(_sample_save_path,str(idx)+"_original.jpg"),img_o)
-    #     save_img_info=LabelInfo(os.path.join(_sample_save_path,str(idx)+".jpg"),\
-    #                             shape=sample_info.shape,
-    #                             objs_info=[("diff",xmin,ymin,xmax,ymax),])
-    #     generate_xml(os.path.join(_sample_save_path,str(idx)+".xml"),save_img_info)
-
-    def do_task(self):
-        # self._all_xml_path_list=['/home/chiebotgpuhq/MyCode/dataset/Siam_detection/aqmzc/ffcd422486d5c6fc0d12604457737e59.xml',]
-        # for idx,xml_path in tqdm(enumerate(self._all_xml_path_list)):
-        #    self.deal_one_sample(idx,xml_path)
+    def do_task(self,max_time:int=None):
+        if max_time is None:
+            max_time=len(self.dataset)
+        '''
+        XXX:测试代码
+        '''
+        # for idx in tqdm(range(max_time)):
+        #    self.deal_one_sample(*self.dataset[idx],idx)
         with futures.ProcessPoolExecutor() as exec:
-            task_list=(exec.submit(self.deal_one_sample,idx,xml_path) \
-                        for idx,xml_path in enumerate(self._all_xml_path_list))
-            for task in tqdm(futures.as_completed(task_list),total=len(self._all_xml_path_list)):
+            task_list=(exec.submit(self.deal_one_sample,*self.dataset[idx],idx) \
+                        for idx in range(max_time))
+            for task in tqdm(futures.as_completed(task_list),total=max_time):
                 pass
 
 
 if __name__=="__main__":
-    xml_dir="/home/chiebotgpuhq/MyCode/dataset/Siam_detection/aqmzc"
-    save_dir="/home/chiebotgpuhq/MyCode/dataset/Siam_detection/gen_siam"
-    test_cls=GenerateSiamsesSample(xml_dir,save_dir)
+    json_path="/home/chiebotgpuhq/Share/gpu-server/disk/disk1/coco_dataset/annotations/instances_train2017.json"
+    save_dir="/home/chiebotgpuhq/MyCode/dataset/test"
+    dataset=COCODataset(json_path)
+    test_cls=GenerateSiamsesSample(dataset,save_dir)
     # print(test_cls._all_xml_path_list)    
-    test_cls.do_task()
+    test_cls.do_task(max_time=10)
     # test_xml="/home/chiebotgpuhq/MyCode/dataset/Siam_detection/train/ffff28d3380f99b27de35c0dc6478849.xml"
     # test_cls.deal_one_sample(0,test_xml)
 

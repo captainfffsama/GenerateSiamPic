@@ -3,7 +3,7 @@
 # @Description: 图像增强
 # @Author: CaptainHu
 # @Date: 2019-11-05 15:24:04
-# @LastEditTime: 2019-12-10 15:19:08
+# @LastEditTime: 2019-12-11 11:10:41
 # @LastEditors: CaptainHu
 import random
 
@@ -28,11 +28,11 @@ def rescale_img(bg,fg,mask):
     # 如果fg有一边大于bg  那就保持横纵比
     fg_hwrate=fg.shape[0]/fg.shape[1]
     if fg.shape[0] >bg.shape[0]:
-        fg=cv2.resize(fg,fx=(bg.shape[0]/fg.shape[0])/fg_hwrate,fy=bg.shape[0]/fg.shape[0])
-        mask=cv2.resize(mask,fx=(bg.shape[0]/mask.shape[0])/mask_hwrate,fy=bg.shape[0]/mask.shape[0])
+        fg=cv2.resize(fg,None,fx=((bg.shape[0]-1)/fg.shape[0])/fg_hwrate,fy=(bg.shape[0]-1)/fg.shape[0])
+        mask=cv2.resize(mask,None,fx=((bg.shape[0]-1)/mask.shape[0])/fg_hwrate,fy=(bg.shape[0]-1)/mask.shape[0])
     if fg.shape[1] >bg.shape[1]:
-        fg=cv2.resize(fg,fx=(bg.shape[1]/fg.shape[1]),fy=bg.shape[1]/fg.shape[1]*fg_hwrate)
-        mask=cv2.resize(mask,fx=(bg.shape[1]/mask.shape[1]),fy=bg.shape[1]/mask.shape[1]*mask_hwrate)
+        fg=cv2.resize(fg,None,fx=((bg.shape[1]-1)/fg.shape[1]),fy=(bg.shape[1]-1)/fg.shape[1]*fg_hwrate)
+        mask=cv2.resize(mask,None,fx=((bg.shape[1]-1)/mask.shape[1]),fy=(bg.shape[1]-1)/mask.shape[1]*fg_hwrate)
     return bg,fg,mask
 
 class AGPolicy(object):
