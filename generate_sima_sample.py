@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: CaptainHu
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-12-13 13:47:07
+# @LastEditTime: 2019-12-13 15:16:31
 # @LastEditors: CaptainHu
 
 import os
@@ -76,9 +76,9 @@ class GenerateSiamsesSample(object):
         '''
         XXX:测试代码
         '''
-        for idx in tqdm(range(max_time)):
+        for idx in tqdm(range(19337,max_time)):
             self.deal_one_sample(*self.dataset[idx],idx)
-        # with futures.ProcessPoolExecutor(work_num) as exec:
+        # with futures.ThreadPoolExecutor() as exec:
         #     task_list=(exec.submit(self.deal_one_sample,*self.dataset[idx],idx) \
         #                 for idx in range(max_time))
         #     for task in tqdm(futures.as_completed(task_list),total=max_time):
