@@ -3,7 +3,7 @@
 # @Description: 用于管理类似voc使用xml管理的dataset
 # @Author: CaptainHu
 # @Date: 2019-12-05 17:00:04
-# @LastEditTime: 2019-12-09 19:19:46
+# @LastEditTime: 2019-12-13 09:28:55
 # @LastEditors: CaptainHu
 import os
 import random
@@ -41,7 +41,7 @@ class XMLLikeDataset(BasicDataset):
         xml_path=self._all_xml_path[idx]
         return xml_path,analysis_label_info(xml_path)
 
-    def _get_fg(self):
+    def _get_fg(self,idx):
         while True:
             xml_path,sample_info=self._get_obj_info()
             if len(sample_info.objs_info) != 0:

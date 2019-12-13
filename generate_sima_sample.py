@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: CaptainHu
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-12-11 11:14:04
+# @LastEditTime: 2019-12-13 13:47:07
 # @LastEditors: CaptainHu
 
 import os
@@ -40,7 +40,12 @@ class GenerateSiamsesSample(object):
         bg,fg,mask=rescale_img(bg,fg,mask)
         #TODO:
         #这里其实可以加个增强的步骤，暂时先不加
-        img,box=self.integration(bg,fg,mask)
+        try:
+            img,box=self.integration(bg,fg,mask)
+        except ValueError:
+            print('idx',idx)
+            return None 
+        
         self._writer(idx,bg,img,box)
 
     def _writer(self,idx,img_o,img,box):
@@ -65,28 +70,26 @@ class GenerateSiamsesSample(object):
         bg,fg,mask=self.dataset[100]
         self.deal_one_sample(bg,fg,mask,100)
 
-    def do_task(self,max_time:int=None):
+    def do_task(self,max_time:int=None,work_num:int =8):
         if max_time is None:
             max_time=len(self.dataset)
         '''
         XXX:测试代码
         '''
-        # for idx in tqdm(range(max_time)):
-        #    self.deal_one_sample(*self.dataset[idx],idx)
-        with futures.ProcessPoolExecutor() as exec:
-            task_list=(exec.submit(self.deal_one_sample,*self.dataset[idx],idx) \
-                        for idx in range(max_time))
-            for task in tqdm(futures.as_completed(task_list),total=max_time):
-                pass
+        for idx in tqdm(range(max_time)):
+            self.deal_one_sample(*self.dataset[idx],idx)
+        # with futures.ProcessPoolExecutor(work_num) as exec:
+        #     task_list=(exec.submit(self.deal_one_sample,*self.dataset[idx],idx) \
+        #                 for idx in range(max_time))
+        #     for task in tqdm(futures.as_completed(task_list),total=max_time):
+        #         pass
 
 
 if __name__=="__main__":
     json_path="/home/chiebotgpuhq/Share/gpu-server/disk/disk1/coco_dataset/annotations/instances_train2017.json"
-    save_dir="/home/chiebotgpuhq/MyCode/dataset/test"
-    dataset=COCODataset(json_path)
+    save_dir="/home/chiebotgpuhq/Share/gpu-server/disk/disk2/cocosiam_dataset/data"
+    dataset=COCODataset(json_path,sampler='normal')
     test_cls=GenerateSiamsesSample(dataset,save_dir)
-    # print(test_cls._all_xml_path_list)    
-    test_cls.do_task(max_time=10)
-    # test_xml="/home/chiebotgpuhq/MyCode/dataset/Siam_detection/train/ffff28d3380f99b27de35c0dc6478849.xml"
-    # test_cls.deal_one_sample(0,test_xml)
+    test_cls.do_task()
+    
 

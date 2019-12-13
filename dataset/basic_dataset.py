@@ -3,7 +3,7 @@
 # @Description: 数据集类的基类，虚类，不要实例化
 # @Author: CaptainHu
 # @Date: 2019-12-06 13:20:04
-# @LastEditTime: 2019-12-06 15:38:32
+# @LastEditTime: 2019-12-13 09:30:25
 # @LastEditors: CaptainHu
 import os
 import random
@@ -42,11 +42,11 @@ class BasicDataset(object):
     
     def __getitem__(self,idx):
         bg=self._get_bg(idx)
-        fg,mask=self._get_fg()
+        fg,mask=self._get_fg(idx)
         return bg,fg,mask 
 
     def _get_bg(self,idx):
         raise AttributeError("You must overwrite _get_bg(self,idx),and return a pic")
 
-    def _get_fg(self):
+    def _get_fg(self,idx):
         raise AttributeError("You must overwrite _get_fg(self),and return a pic and it mask")

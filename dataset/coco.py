@@ -3,7 +3,7 @@
 # @Description: 使用coco合成
 # @Author: CaptainHu
 # @Date: 2019-12-09 19:20:38
-# @LastEditTime: 2019-12-11 10:36:23
+# @LastEditTime: 2019-12-13 13:44:24
 # @LastEditors: CaptainHu
 import random
 import math
@@ -58,20 +58,37 @@ class COCODataset(BasicDataset):
     def _get_bg(self,idx):
         result,_=self._imread(self._imgIDs[idx])
         return result
+    
+    def _pic_valid(self,pic):
+        if pic.shape[0] <30 or pic.shape[1] <30:
+            return False
+        return True
 
-    def _get_fg(self):
+    def _get_fg(self,idx):
+        # idx_=idx
         if self._cats is not None and isinstance(self._cats,Iterable):
             catsIDs=self._coco.getCatIds(catNms=self._cats)
             imgIds=self._coco.getImgIds(catIds=catsIDs)
         else:
             imgIds=self._imgIDs
-        fg,img_info=self._imread(random.choice(imgIds))
-        annIds = self._coco.getAnnIds(imgIds=img_info['id'], iscrowd=None)
-        anns = self._coco.loadAnns(annIds)
-        mask=self._coco.annToMask(anns[0])*255
-        box=self._deal_limit(mask.shape,anns[0]["bbox"])
-        mask=mask[box[1]:box[3],box[0]:box[2]]
-        fg=fg[box[1]:box[3],box[0]:box[2]]
+        while True:
+            while True:
+                # XXX:OPENCV有bug，有图片会炸，这里先去掉随机，查查图片是啥样子
+                # 这里简单处理下 不符合的直接再读
+                fg,img_info=self._imread(random.choice(imgIds))
+                # fg,img_info=self._imread(imgIds[idx_])
+                # print('idx:{},  idx_:{}'.format(idx,idx_))
+                # idx_=idx_+1
+                annIds = self._coco.getAnnIds(imgIds=img_info['id'], iscrowd=None)
+                if annIds:
+                    break
+            anns = self._coco.loadAnns(annIds)
+            mask=self._coco.annToMask(anns[0])*255
+            box=self._deal_limit(mask.shape,anns[0]["bbox"])
+            mask=mask[box[1]:box[3],box[0]:box[2]]
+            fg=fg[box[1]:box[3],box[0]:box[2]]
+            if self._pic_valid(fg) and self._pic_valid(mask):
+                break
         return fg,mask
     
     #NOTE:注意COCO原始box是(x,y,w,h)，这里变换完之后变成tr和bl
