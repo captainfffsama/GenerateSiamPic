@@ -3,7 +3,7 @@
 # @Description: 测试用的脚本
 # @Author: CaptainHu
 # @Date: 2019-12-06 15:24:51
-# @LastEditTime: 2019-12-13 13:30:09
+# @LastEditTime: 2019-12-16 09:55:41
 # @LastEditors: CaptainHu
 import cv2
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ def timeblock(label:str = '\033[1;34mSpend time:\033[0m'):
         print('\033[1;34m{} : {}\033[0m'.format(label, end - start))
 
 xml_dir="/home/chiebotgpuhq/MyCode/dataset/Siam_detection/aqmzc"
-json_path="/home/chiebotgpuhq/Share/gpu-server/disk/disk1/coco_dataset/annotations/instances_train2017.json"
+json_path="/home/chiebotgpuhq/Share/gpu-server/disk/disk1/coco_dataset/annotations/instances_val2017.json"
 # a=XMLLikeDataset(xml_dir)
 a=COCODataset(json_path)
 
@@ -44,6 +44,6 @@ b,f,m=a[1263]
 # cv2.waitKey(100)
 # b,roi=seamlessclone(b,f,m)
 # plt.imshow(b)
-plt.imshow(f)
+plt.imshow(m)
 # plt.imshow(m)
 plt.show()

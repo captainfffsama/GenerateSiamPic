@@ -3,7 +3,7 @@
 # @Description:对图像识别大赛中图片某以区域进行随机的变换 得到的训练集
 # @Author: CaptainHu
 # @Date: 2019-11-05 09:41:32
-# @LastEditTime: 2019-12-13 15:16:31
+# @LastEditTime: 2019-12-16 10:18:50
 # @LastEditors: CaptainHu
 
 import os
@@ -76,7 +76,7 @@ class GenerateSiamsesSample(object):
         '''
         XXX:测试代码
         '''
-        for idx in tqdm(range(19337,max_time)):
+        for idx in tqdm(range(4589,max_time)):
             self.deal_one_sample(*self.dataset[idx],idx)
         # with futures.ThreadPoolExecutor() as exec:
         #     task_list=(exec.submit(self.deal_one_sample,*self.dataset[idx],idx) \
@@ -86,8 +86,8 @@ class GenerateSiamsesSample(object):
 
 
 if __name__=="__main__":
-    json_path="/home/chiebotgpuhq/Share/gpu-server/disk/disk1/coco_dataset/annotations/instances_train2017.json"
-    save_dir="/home/chiebotgpuhq/Share/gpu-server/disk/disk2/cocosiam_dataset/data"
+    json_path="/home/chiebotgpuhq/Share/gpu-server/disk/disk1/coco_dataset/annotations/instances_val2017.json"
+    save_dir="/home/chiebotgpuhq/Share/gpu-server/disk/disk2/cocosiam_dataset/val"
     dataset=COCODataset(json_path,sampler='normal')
     test_cls=GenerateSiamsesSample(dataset,save_dir)
     test_cls.do_task()
